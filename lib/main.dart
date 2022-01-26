@@ -1,8 +1,14 @@
 // ignore_for_file: must_be_immutable
 
+import 'dart:io';
+
 import 'package:better_flutter_form_eg/custom_form_field.dart';
+import 'package:better_flutter_form_eg/custom_image_form_field.dart';
+import 'package:better_flutter_form_eg/form_submission.dart';
 import 'package:better_flutter_form_eg/profile.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -48,11 +54,48 @@ class FormPage extends StatelessWidget {
               hintText: 'Name',
               initialValue: _profile.name,
               onChanged: (value) => _profile.name = value,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(
+                  RegExp(r"[a-zA-Z]+|\s"),
+                )
+              ],
+              validator: (val) {
+                if (val == null || val.isEmpty) {
+                  return 'Enter a valid name';
+                }
+              },
             ),
             CustomTextField(
+              maxLength: 10,
               hintText: 'Phone No',
               initialValue: _profile.phoneNo,
               onChanged: (value) => _profile.phoneNo = value,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (val) {
+                if (val == null || val.length < 10) {
+                  return 'Enter a valid phone no';
+                }
+              },
+            ),
+            CustomImageFormField(
+              initialValue: _profile.profilePic,
+              validator: (val) {
+                print('fired');
+                if (val == null) return 'Pick a picture';
+              },
+              onPicked: (_file) => _profile.profilePic = _file,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => FormSubmission(profile: _profile),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Submit'),
             )
           ],
         ),
